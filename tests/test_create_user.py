@@ -1,6 +1,6 @@
 from conftest import *
 import allure
-from data import USER_DATA_FOR_LOGIN
+from data import *
 
 
 @allure.feature("Создание пользователя")
@@ -23,26 +23,22 @@ class TestCreateUser:
         assert status_code == 403 and response_data.get("message") == "User already exists", (
             f"Ожидался код 403, но получен {status_code}: {response_data}")
 
+    @pytest.mark.parametrize(
+        "test_data",
+        [
+            (USER_REGISTRATION_EMPTY_DATA["missing_email"]),
+            (USER_REGISTRATION_EMPTY_DATA["missing_password"]),
+            (USER_REGISTRATION_EMPTY_DATA["missing_name"]),
+        ],
+        ids=[
+            "Missing email field",
+            "Missing password field",
+            "Missing name field"
+        ]
+    )
     @allure.story("Создание пользователя с отсутствующим обязательным полем")
-    @allure.title('Проверка корректной ошибки при попытке создания пользователя без поля почты')
-    def test_login_missing_email_field(self, user_methods):
-        missing_email_data = {"password": "1234567", "email": "", "name": "name"}
-        status_code, response_data = user_methods.register_user(missing_email_data)
-        assert status_code == 403 and response_data.get("message") == "Email, password and name are required fields", (
-            f"Ожидался код 403, но получен {status_code}: {response_data}")
-
-    @allure.story("Создание пользователя с отсутствующим обязательным полем")
-    @allure.title('Проверка корректной ошибки при попытке создания пользователя без поля пароль')
-    def test_login_missing_password_field(self, user_methods):
-        missing_password_data = {"login": "karry_karrow@yandex.ru", "password": "", "name": "name"}
-        status_code, response_data = user_methods.register_user(missing_password_data)
-        assert status_code == 403 and response_data.get("message") == "Email, password and name are required fields", (
-            f"Ожидался код 403, но получен {status_code}: {response_data}")
-
-    @allure.story("Создание пользователя с отсутствующим обязательным полем")
-    @allure.title('Проверка корректной ошибки при попытке создания пользователя без поля имя')
-    def test_login_missing_password_field(self, user_methods):
-        missing_name_data = {"login": "karry_karrow@yandex.ru", "password": "12345", "name": ""}
-        status_code, response_data = user_methods.register_user(missing_name_data)
+    @allure.title('Проверка корректной ошибки при попытке создания пользователя с отсутствующим обязательным полем')
+    def test_user_creation_with_missing_fields(self, user_methods, test_data):
+        status_code, response_data = user_methods.register_user(test_data)
         assert status_code == 403 and response_data.get("message") == "Email, password and name are required fields", (
             f"Ожидался код 403, но получен {status_code}: {response_data}")
